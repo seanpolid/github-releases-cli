@@ -34,4 +34,18 @@ public class FileUtil {
 		return zipPath;
 	}
 	
+	public static boolean isValidPath(String path) {
+		File file = new File(path);
+		if (file.isAbsolute() && file.exists()) {
+			return true;
+		}
+		
+		file = new File(System.getProperty("user.dir") + "/" + path);
+		if (file.exists()) {
+			return true;
+		}
+		
+		return false;
+	}
+	
 }
