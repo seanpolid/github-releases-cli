@@ -16,9 +16,9 @@ public class Entry  {
     		return;
     	}
     	
-    	String githubOwner = System.getenv("GITHUB_OWNER");
-    	if (githubOwner == null || githubOwner.isBlank()) {
-    		System.out.println("Sorry, could not identify the GitHub owner. Please ensure the following environment variable has been set: GITHUB_OWNER");
+    	String repoOwner = System.getenv("REPO_OWNER");
+    	if (repoOwner == null || repoOwner.isBlank()) {
+    		System.out.println("Sorry, could not identify the owner of the repository. Please ensure the following environment variable has been set: REPO_OWNER");
     		return;
     	}
     	
@@ -32,7 +32,7 @@ public class Entry  {
     	
     	System.out.println(asssetPath);
     	System.out.println(repo);
-    	System.out.println(githubOwner);
+    	System.out.println(repoOwner);
     	System.out.println(githubToken);
     }
     
