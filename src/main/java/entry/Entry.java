@@ -1,17 +1,22 @@
 package entry;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Options;
+
+import orchestrators.Orchestrator;
 import utils.FileUtil;
 
 public class Entry  {
 	
-    public static void main( String[] args ) {
-    	if (args.length != 2 || args[0].isBlank() || args[1].isBlank()) {
-    		System.out.println("./release <Asset Path> <Repository Name>");
-    		return;
-    	}
-    	
-    	String asssetPath = args[0];
-    	if (!FileUtil.isValidPath(asssetPath)) {
+    public static void main(String[] args) {
+    	Options options = createOptions();
+    	CommandLine cmd = parseArgs(options, args);
+    	if (cmd == null) {return;}
+
+    	if (!cmd.hasOption("p") || !FileUtil.isValidPath(cmd.getOptionValue("p"))) {
     		System.out.println("The provided asset path is invalid.");
     		return;
     	}
@@ -28,12 +33,40 @@ public class Entry  {
     		return;
     	}
     	
-    	String repo = args[1];
-    	
-    	System.out.println(asssetPath);
-    	System.out.println(repo);
-    	System.out.println(repoOwner);
-    	System.out.println(githubToken);
+    	try {
+    		Orchestrator.run(cmd.getOptionValue("p"), cmd.getOptionValue("r"), cmd.getOptionValue("n"), repoOwner, githubToken);
+    	} catch (Exception ex) {
+    		System.out.println("An unexpected error occurred while trying to publish a release: " + ex.getMessage());
+    	}
     }
+    
+    private static Options createOptions() {
+    	Options options = new Options();
+    	options.addRequiredOption("p", "path", true, "Path to asset(s)");
+    	options.addRequiredOption("r", "repo", true, "Name of repository");
+    	options.addOption("n", "name", true, "Name of zip file");
+    	options.addOption("h", "help", false, "Help menu");
+    	options.addOption("v", "version", true, "Version of release");
+    	return options; 
+    }
+
+	private static CommandLine parseArgs(Options options, String[] args) {
+		try {
+			CommandLineParser parser = new DefaultParser();
+	    	CommandLine cmd = parser.parse(options, args);
+	    	return cmd;
+		} catch (Exception ex) {
+			for (String arg : args) {
+				if (arg.contains("-h") || arg.contains("--help")) {
+					HelpFormatter formatter = new HelpFormatter();
+		    		formatter.printHelp("release", "Publish a release to GitHub", options, null, true);
+		    		return null;
+				}
+			}
+			
+			System.out.println("release: " + ex.getMessage() + "\nTry 'release --help' for more information.");
+			return null;
+		}
+	}
     
 }
