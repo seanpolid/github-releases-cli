@@ -9,10 +9,10 @@ import java.util.zip.ZipOutputStream;
 
 public class FileUtil {
 
-	public static String zipAsset(String assetPath) throws IOException {
+	public static String zipAsset(String assetPath, String zipName) throws IOException {
 		File file = new File(assetPath);
 		String parentPath = file.getParent();
-		String zipPath = parentPath + "/build.zip";
+		String zipPath = parentPath + "/" + zipName + ".zip";
 		
 		FileInputStream inputStream = new FileInputStream(assetPath);
 		FileOutputStream outputStream = new FileOutputStream(new File(zipPath));

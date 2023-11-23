@@ -30,23 +30,43 @@ import enums.ContentType;
 
 public class GitHubClient {
 	
-	private static HttpClient httpClient = HttpClient.newHttpClient();
-	private static String owner = System.getenv("GITHUB_OWNER");
-	private static String token = System.getenv("GITHUB_TOKEN");
-	private static Gson serializationGson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
+	private final String REPO_OWNER;
+	private final String GITHUB_TOKEN;
+	private HttpClient httpClient = HttpClient.newHttpClient();
+	private Gson serializationGson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
 	
-	private static HttpRequest createRequest(String uri, String method, BodyPublisher body, AcceptType acceptType, ContentType contentType) throws URISyntaxException {
+	public GitHubClient(String repoOwner, String githubToken) {
+		REPO_OWNER = repoOwner;
+		GITHUB_TOKEN = githubToken;
+	}
+	
+	public String createRelease(String repositoryName, String zipName) throws URISyntaxException, CertificateExpiredException, CertificateNotYetValidException, IOException, InterruptedException {
+		String uri = "https://api.github.com/repos/" + REPO_OWNER + "/" + repositoryName + "/releases";
+		String method = "POST";
+		CreateReleaseRequestDTO releaseRequestDTO = new CreateReleaseRequestDTO("v1.0.2", "master");
+
+		BodyPublisher body = BodyPublishers.ofString(serializationGson.toJson(releaseRequestDTO));
+		Type type = new TypeToken<CreateReleaseResponseDTO>() {}.getType();
+		
+		HttpRequest request = createRequest(uri, method, body, AcceptType.GITHUB_JSON, ContentType.JSON);
+		CreateReleaseResponseDTO response = send(request, type);
+		
+		String uploadUrl = response.getUploadUrl();
+		return uploadUrl.substring(0, uploadUrl.indexOf('{')) + "?name=" + zipName + "&label=" + zipName;
+	}
+	
+	private HttpRequest createRequest(String uri, String method, BodyPublisher body, AcceptType acceptType, ContentType contentType) throws URISyntaxException {
 		return HttpRequest.newBuilder()
 				 .uri(new URI(uri))
 				 .header("Accept", getAcceptTypeString(acceptType))
-				 .header("Authorization", "Bearer " + token)
+				 .header("Authorization", "Bearer " + GITHUB_TOKEN)
 				 .header("X-GitHub-Api-Version", "2022-11-28")
 				 .header("Content-Type", getContentTypeString(contentType))
 				 .method(method, body)
 				 .build();
 	}
 
-	private static String getAcceptTypeString(AcceptType acceptType) {
+	private String getAcceptTypeString(AcceptType acceptType) {
 		switch (acceptType) {
 			case GITHUB_JSON:
 				return "application/vnd.github+json";
@@ -57,7 +77,7 @@ public class GitHubClient {
 		}	
 	}
 	
-	private static String getContentTypeString(ContentType contentType) {
+	private String getContentTypeString(ContentType contentType) {
 		switch (contentType) {
 			case ZIP:
 				return "application/zip";
@@ -68,7 +88,7 @@ public class GitHubClient {
 		}
 	}
 
-	private static <T> T send(HttpRequest request, Type type) throws IOException, InterruptedException, CertificateExpiredException, CertificateNotYetValidException {
+	private <T> T send(HttpRequest request, Type type) throws IOException, InterruptedException, CertificateExpiredException, CertificateNotYetValidException {
 		HttpResponse<String> response = httpClient.send(request, BodyHandlers.ofString());
 		SSLSession sslSession = response.sslSession().get();
 
@@ -80,22 +100,7 @@ public class GitHubClient {
 		return serializationGson.fromJson(response.body(), type);
 	}
 	
-	public static String createRelease(String repo) throws URISyntaxException, CertificateExpiredException, CertificateNotYetValidException, IOException, InterruptedException {
-		String uri = "https://api.github.com/repos/" + owner + "/" + repo + "/releases";
-		String method = "POST";
-		CreateReleaseRequestDTO releaseRequestDTO = new CreateReleaseRequestDTO("v1.0.2", "master");
-
-		BodyPublisher body = BodyPublishers.ofString(serializationGson.toJson(releaseRequestDTO));
-		Type type = new TypeToken<CreateReleaseResponseDTO>() {}.getType();
-		
-		HttpRequest request = createRequest(uri, method, body, AcceptType.GITHUB_JSON, ContentType.JSON);
-		CreateReleaseResponseDTO response = send(request, type);
-		
-		String uploadUrl = response.getUploadUrl();
-		return uploadUrl.substring(0, uploadUrl.indexOf('{')) + "?name=build.zip&label=build.zip";
-	}
-	
-	public static void uploadReleaseAsset(String uri, String assetPath) throws IOException, URISyntaxException, CertificateExpiredException, CertificateNotYetValidException, InterruptedException {
+	public void uploadReleaseAsset(String uri, String assetPath) throws IOException, URISyntaxException, CertificateExpiredException, CertificateNotYetValidException, InterruptedException {
 		String method = "POST";
 
 		BufferedInputStream stream = new BufferedInputStream(new FileInputStream(assetPath));
@@ -108,5 +113,7 @@ public class GitHubClient {
 		
 		stream.close();
 	}
+	
+	
 	
 }
