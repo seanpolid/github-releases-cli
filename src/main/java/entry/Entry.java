@@ -5,7 +5,7 @@ import utils.FileUtil;
 public class Entry  {
 	
     public static void main( String[] args ) {
-    	if (args.length != 2) {
+    	if (args.length != 2 || args[0].isBlank() || args[1].isBlank()) {
     		System.out.println("./release <Asset Path> <Repository Name>");
     		return;
     	}
