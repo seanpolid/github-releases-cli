@@ -8,17 +8,27 @@ import org.apache.commons.cli.Options;
 
 import orchestrators.Orchestrator;
 import utils.FileUtil;
+import models.UserOptions;
 
 public class Entry  {
 	
     public static void main(String[] args) {
-    	Options options = createOptions();
-    	CommandLine cmd = parseArgs(options, args);
+    	CommandLine cmd = parseArgs(args);
     	if (cmd == null) {return;}
 
     	if (!cmd.hasOption("p") || !FileUtil.isValidPath(cmd.getOptionValue("p"))) {
     		System.out.println("The provided asset path is invalid.");
     		return;
+    	}
+    	
+    	String version = cmd.getOptionValue("v");
+    	if (!cmd.hasOption("v")) {
+    		version = FileUtil.findVersion(cmd.getOptionValue("p"));
+    		
+    		if (version == null) {
+    			System.out.println("Could not determine appropriate version for release. Please provide a version or ensure it is present within/at the asset path.");
+    			return;
+    		}
     	}
     	
     	String repoOwner = System.getenv("REPO_OWNER");
@@ -34,28 +44,21 @@ public class Entry  {
     	}
     	
     	try {
-    		Orchestrator.run(cmd.getOptionValue("p"), cmd.getOptionValue("r"), cmd.getOptionValue("n"), repoOwner, githubToken);
+    		UserOptions userOptions = createUserOptions(cmd, version);	
+    		Orchestrator.run(userOptions, repoOwner, githubToken);
     	} catch (Exception ex) {
     		System.out.println("An unexpected error occurred while trying to publish a release: " + ex.getMessage());
     	}
     }
-    
-    private static Options createOptions() {
-    	Options options = new Options();
-    	options.addRequiredOption("p", "path", true, "Path to asset(s)");
-    	options.addRequiredOption("r", "repo", true, "Name of repository");
-    	options.addOption("n", "name", true, "Name of zip file");
-    	options.addOption("h", "help", false, "Help menu");
-    	options.addOption("v", "version", true, "Version of release");
-    	return options; 
-    }
 
-	private static CommandLine parseArgs(Options options, String[] args) {
+	private static CommandLine parseArgs(String[] args) {
+		Options options = createOptions();
 		try {
 			CommandLineParser parser = new DefaultParser();
 	    	CommandLine cmd = parser.parse(options, args);
 	    	return cmd;
 		} catch (Exception ex) {
+			
 			for (String arg : args) {
 				if (arg.contains("-h") || arg.contains("--help")) {
 					HelpFormatter formatter = new HelpFormatter();
@@ -67,6 +70,25 @@ public class Entry  {
 			System.out.println("release: " + ex.getMessage() + "\nTry 'release --help' for more information.");
 			return null;
 		}
+	}
+	
+	private static Options createOptions() {
+    	Options options = new Options();
+    	options.addRequiredOption("p", "path", true, "Path to asset(s)");
+    	options.addRequiredOption("r", "repo", true, "Name of repository");
+    	options.addOption("n", "name", true, "Name of zip file");
+    	options.addOption("h", "help", false, "Help menu");
+    	options.addOption("v", "version", true, "Version of release");
+    	return options; 
+    }
+	
+	private static UserOptions createUserOptions(CommandLine cmd, String version) {
+		UserOptions userOptions = new UserOptions(cmd.getOptionValue("p"),
+							   					  cmd.getOptionValue("r"),
+							   					  cmd.getOptionValue("n"),
+							   					  version);
+		userOptions.formatZipName();
+		return userOptions;
 	}
     
 }

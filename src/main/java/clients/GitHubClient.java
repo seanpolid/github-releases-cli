@@ -40,10 +40,10 @@ public class GitHubClient {
 		GITHUB_TOKEN = githubToken;
 	}
 	
-	public String createRelease(String repositoryName, String zipName) throws URISyntaxException, CertificateExpiredException, CertificateNotYetValidException, IOException, InterruptedException {
+	public String createRelease(String repositoryName, String zipName, String version) throws URISyntaxException, CertificateExpiredException, CertificateNotYetValidException, IOException, InterruptedException {
 		String uri = "https://api.github.com/repos/" + REPO_OWNER + "/" + repositoryName + "/releases";
 		String method = "POST";
-		CreateReleaseRequestDTO releaseRequestDTO = new CreateReleaseRequestDTO("v1.0.2", "master");
+		CreateReleaseRequestDTO releaseRequestDTO = new CreateReleaseRequestDTO("v" + version, "master");
 
 		BodyPublisher body = BodyPublishers.ofString(serializationGson.toJson(releaseRequestDTO));
 		Type type = new TypeToken<CreateReleaseResponseDTO>() {}.getType();

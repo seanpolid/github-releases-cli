@@ -1,31 +1,22 @@
 package orchestrators;
 
 import clients.GitHubClient;
+import models.UserOptions;
 
 public class Orchestrator {
 	
 	private static String defaultZipName = "assets";
 
-	public static void run(String assetPath, String repositoryName, String zipName, String repoOwner, String githubToken) throws Exception {
-		zipName = zipName == null ? defaultZipName : formatZipName(zipName);
+	public static void run(UserOptions options, String repoOwner, String githubToken) throws Exception {
+		String zipName = options.getZipName() == null ? defaultZipName : options.getZipName();
 		
 		GitHubClient gitHubClient = new GitHubClient(repoOwner, githubToken);
+		gitHubClient.createRelease(options.getRepositoryName(), options.getZipName(), options.getVersion());
 		
-		// Get latest release version
-		// Create release with next version in sequence
-		gitHubClient.createRelease(repositoryName, zipName);
-		
-		System.out.println(assetPath);
-    	System.out.println(repositoryName);
+		System.out.println(options.getAssetPath());
+    	System.out.println(options.getRepositoryName());
     	System.out.println(repoOwner);
     	System.out.println(githubToken);
 	}
-	
-	private static String formatZipName(String zipName) {
-		if (zipName.contains(".zip")) {
-			return zipName.substring(0, zipName.indexOf(".zip"));
-		}
-		
-		return zipName;
-	}
+
 }
