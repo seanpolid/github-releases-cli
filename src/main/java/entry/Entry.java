@@ -15,40 +15,22 @@ public class Entry  {
     public static void main(String[] args) {
     	CommandLine cmd = parseArgs(args);
     	if (cmd == null) {return;}
-
-    	if (!cmd.hasOption("p") || !FileUtil.isValidPath(cmd.getOptionValue("p"))) {
-    		System.out.println("The provided asset path is invalid.");
-    		return;
-    	}
     	
-    	String version = cmd.getOptionValue("v");
-    	if (!cmd.hasOption("v")) {
-    		version = FileUtil.findVersion(cmd.getOptionValue("p"));
-    		
-    		if (version == null) {
-    			System.out.println("Could not determine appropriate version for release. Please provide a version or ensure it is present within/at the asset path.");
-    			return;
-    		}
-    	}
+    	String assetPath = getAssetPath(cmd);
+    	if (assetPath == null) {return;}
     	
-    	String repoOwner = System.getenv("REPO_OWNER");
-    	if (repoOwner == null || repoOwner.isBlank()) {
-    		System.out.println("Sorry, could not identify the owner of the repository. Please ensure the following environment variable has been set: REPO_OWNER");
-    		return;
-    	}
+    	String version = getVersion(cmd);
+    	if (version == null) {return;}
     	
-    	String githubToken = System.getenv("GITHUB_TOKEN");
-    	if (githubToken == null || githubToken.isBlank()) {
-    		System.out.println("Sorry, could not identify the GitHub token. Please ensure the following environment variable has been set: GITHUB_TOKEN");
-    		return;
-    	}
+    	String repoOwner = getRepoOwner();
+    	if (repoOwner == null) {return;}
     	
-    	try {
-    		UserOptions userOptions = createUserOptions(cmd, version);	
-    		Orchestrator.run(userOptions, repoOwner, githubToken);
-    	} catch (Exception ex) {
-    		System.out.println("An unexpected error occurred while trying to publish a release: " + ex.getMessage());
-    	}
+    	String gitHubToken = getGitHubToken();
+    	if (gitHubToken == null) {return;}
+    	
+    	UserOptions userOptions = new UserOptions(assetPath, cmd.getOptionValue("r"), cmd.getOptionValue("n"), version);
+    	
+    	run(userOptions, repoOwner, gitHubToken);
     }
 
 	private static CommandLine parseArgs(String[] args) {
@@ -58,7 +40,6 @@ public class Entry  {
 	    	CommandLine cmd = parser.parse(options, args);
 	    	return cmd;
 		} catch (Exception ex) {
-			
 			for (String arg : args) {
 				if (arg.contains("-h") || arg.contains("--help")) {
 					HelpFormatter formatter = new HelpFormatter();
@@ -82,13 +63,53 @@ public class Entry  {
     	return options; 
     }
 	
-	private static UserOptions createUserOptions(CommandLine cmd, String version) {
-		UserOptions userOptions = new UserOptions(cmd.getOptionValue("p"),
-							   					  cmd.getOptionValue("r"),
-							   					  cmd.getOptionValue("n"),
-							   					  version);
-		userOptions.formatZipName();
-		return userOptions;
+	private static String getAssetPath(CommandLine cmd) {
+		if (!cmd.hasOption("p") || !FileUtil.isValidPath(cmd.getOptionValue("p"))) {
+    		System.out.println("The provided asset path is invalid.");
+    		return null;
+    	}
+		
+		return cmd.getOptionValue("p");
+	}
+	
+	private static String getVersion(CommandLine cmd) {
+		String version = cmd.getOptionValue("v");
+    	if (!cmd.hasOption("v")) {
+    		version = FileUtil.findVersion(cmd.getOptionValue("p"));
+    		
+    		if (version == null) {
+    			System.out.println("Could not determine appropriate version for release. Please provide a version or ensure it is present within/at the asset path.");
+    		}
+    	}
+    	
+		return version;
+	}
+	
+	private static String getRepoOwner() {
+		String repoOwner = System.getenv("REPO_OWNER");
+    	if (repoOwner == null || repoOwner.isBlank()) {
+    		System.out.println("Sorry, could not identify the owner of the repository. Please ensure the following environment variable has been set: REPO_OWNER");
+    		return null;
+    	}
+    	
+		return repoOwner;
+	}
+	
+	private static String getGitHubToken() {
+		String gitHubToken = System.getenv("GITHUB_TOKEN");
+    	if (gitHubToken == null || gitHubToken.isBlank()) {
+    		System.out.println("Sorry, could not identify the GitHub token. Please ensure the following environment variable has been set: GITHUB_TOKEN");
+    		return null;
+    	}
+    	
+		return gitHubToken;
 	}
     
+	private static void run(UserOptions userOptions, String repoOwner, String gitHubToken) {
+		try {
+    		Orchestrator.run(userOptions, repoOwner, gitHubToken);
+    	} catch (Exception ex) {
+    		System.out.println("An unexpected error occurred while trying to publish the release: " + ex.getMessage());
+    	}
+	}
 }
