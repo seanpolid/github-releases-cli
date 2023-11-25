@@ -7,7 +7,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 
 import orchestrators.Orchestrator;
-import utils.FileUtil;
+import utils.FileUtils;
 import models.UserOptions;
 
 public class Entry  {
@@ -64,7 +64,7 @@ public class Entry  {
     }
 	
 	private static String getAssetPath(CommandLine cmd) {
-		if (!cmd.hasOption("p") || !FileUtil.isValidPath(cmd.getOptionValue("p"))) {
+		if (!cmd.hasOption("p") || !FileUtils.isValidPath(cmd.getOptionValue("p"))) {
     		System.out.println("The provided asset path is invalid.");
     		return null;
     	}
@@ -75,7 +75,7 @@ public class Entry  {
 	private static String getVersion(CommandLine cmd) {
 		String version = cmd.getOptionValue("v");
     	if (!cmd.hasOption("v")) {
-    		version = FileUtil.findVersion(cmd.getOptionValue("p"));
+    		version = FileUtils.findVersion(cmd.getOptionValue("p"));
     		
     		if (version == null) {
     			System.out.println("Could not determine appropriate version for release. Please provide a version or ensure it is present within/at the asset path.");
