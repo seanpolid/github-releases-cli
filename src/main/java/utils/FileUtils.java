@@ -42,7 +42,6 @@ public class FileUtils {
         	
         	String newBaseDir = basePath + pathFile.getName() + "/";
             for (File file : files) {
-            	zipOutputStream.putNextEntry(new ZipEntry(newBaseDir));
                 zip(file, zipOutputStream, newBaseDir);
             }
         } else {

@@ -133,10 +133,14 @@ public class FileUtilsTests {
 		
 		ZipEntry entry;
 		while((entry = zipInputStream.getNextEntry()) != null) {
-			String fileName = new File(entry.getName()).getName();
-			if (!entry.getName().contains(".")) {
-				File file = new File(parentPath + "/" + fileName);
-				file.mkdir();
+			File nextFile = new File(parentPath + "/" + entry.getName());
+			if (nextFile.getPath().contains(".") && !new File(nextFile.getParent()).exists()) {
+				File file = new File(nextFile.getParent());
+				file.mkdirs();
+			}
+			
+			if (!nextFile.getPath().contains(".") && !nextFile.exists()) {
+				nextFile.mkdirs();
 				continue;
 			}
 			
