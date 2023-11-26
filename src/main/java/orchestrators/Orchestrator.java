@@ -2,6 +2,7 @@ package orchestrators;
 
 import clients.GitHubClient;
 import models.UserOptions;
+import utils.FileUtils;
 
 public class Orchestrator {
 	
@@ -11,12 +12,15 @@ public class Orchestrator {
 		String zipName = options.getZipName() == null ? defaultZipName : options.getZipName();
 		
 		GitHubClient gitHubClient = new GitHubClient(repoOwner, githubToken);
-		gitHubClient.createRelease(options.getRepositoryName(), options.getZipName(), options.getVersion());
 		
-		System.out.println(options.getAssetPath());
-    	System.out.println(options.getRepositoryName());
-    	System.out.println(repoOwner);
-    	System.out.println(githubToken);
+		System.out.println("Creating release");
+		String uploadUri = gitHubClient.createRelease(options.getRepositoryName(), zipName, options.getVersion());
+		
+		System.out.println("Zipping asset(s)");
+		String zippedAssetPath = FileUtils.zipAsset(options.getAssetPath(), zipName);
+		
+		System.out.println("Uploading asset(s)");
+		gitHubClient.uploadReleaseAsset(uploadUri, zippedAssetPath);
 	}
 
 }
