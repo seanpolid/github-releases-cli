@@ -9,7 +9,6 @@ namespace GitHubReleasesCLI
 
         static async Task Main(string[] args)
         {
-            var variables = Environment.GetEnvironmentVariables();
             if (GITHUB_TOKEN == null) 
             {
                 Console.WriteLine("Sorry, could not identify the GitHub token. " +
