@@ -1,49 +1,31 @@
 ﻿using GitHubReleasesCLI.dtos;
 using GitHubReleasesCLI.enums;
 using GitHubReleasesCLI.NewFolder;
+using GitHubReleasesCLI.utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using System.Text;
 
 namespace GitHubReleasesCLI.clients
 {
-    internal class GitHubClient
+    public class GitHubClient
     {
         private readonly string GITHUB_TOKEN;
         private readonly string REPO_OWNER;
-        private readonly HttpClient client;
-        private readonly JsonSerializerSettings settings;
+        private readonly BaseHttpClient httpClient;
 
         public GitHubClient(string gitHubToken, string repoOwner)
         {
             GITHUB_TOKEN = gitHubToken;
             REPO_OWNER = repoOwner;
-            client = new HttpClient();
-
-            settings = new JsonSerializerSettings()
-            {
-                MissingMemberHandling = MissingMemberHandling.Ignore,
-                ContractResolver = new DefaultContractResolver()
-                {
-                    NamingStrategy = new SnakeCaseNamingStrategy()
-                }
-            };
+            httpClient = new BaseHttpClient();
         }
 
-        public GitHubClient(string githubToken, string repoOwner, HttpClient client)
+        public GitHubClient(string githubToken, string repoOwner, BaseHttpClient client)
         {
             GITHUB_TOKEN = githubToken;
             REPO_OWNER = repoOwner;
-            this.client = client;
-
-            settings = new JsonSerializerSettings()
-            {
-                MissingMemberHandling = MissingMemberHandling.Ignore,
-                ContractResolver = new DefaultContractResolver()
-                {
-                    NamingStrategy = new SnakeCaseNamingStrategy()
-                }
-            };
+            this.httpClient = client;
         }
 
         /// <summary>
@@ -55,8 +37,8 @@ namespace GitHubReleasesCLI.clients
         /// <returns></returns>
         public async Task<string> CreateRelease(string repositoryName, string version, bool makeDraft, bool makeLatest, string zipName)
         {
-            var uri = $"https://api.github.com/repos/{REPO_OWNER}/{repositoryName}/releases";
-            var createReleaseRequestDTO = new CreateReleaseRequestDTO()
+            string uri = $"https://api.github.com/repos/{REPO_OWNER}/{repositoryName}/releases";
+            CreateReleaseRequestDTO createReleaseRequestDTO = new()
             {
                 TagName = version,
                 Name = version,
@@ -66,15 +48,14 @@ namespace GitHubReleasesCLI.clients
                 TargetCommitish = "main"
             };
 
-            var request = CreateRequestMessage(HttpMethod.Post, uri, AcceptType.GITHUB_JSON, ContentType.JSON, createReleaseRequestDTO);
-            var response = await Send<CreateReleaseResponseDTO>(request);
+            HttpRequestMessage request = CreateRequestMessage(HttpMethod.Post, uri, AcceptType.GITHUB_JSON, ContentType.JSON, createReleaseRequestDTO);
+            CreateReleaseResponseDTO response = await httpClient.Send<CreateReleaseResponseDTO>(request);
 
             return CreateUploadUrl(response.UploadUrl, zipName);
         }
 
         private HttpRequestMessage CreateRequestMessage(HttpMethod method, string uri, AcceptType acceptType, ContentType contentType, object body)
         {
-            string serializedBody = JsonConvert.SerializeObject(body, Formatting.Indented, settings);
             return new()
             {
                 Method = method,
@@ -84,9 +65,9 @@ namespace GitHubReleasesCLI.clients
                     {"Accept", GetAcceptTypeString(acceptType)},
                     {"Authorization", $"Bearer {GITHUB_TOKEN}"},
                     {"X-GitHub-Api-Version", "2022-11-28"},
-                    {"User-Agent", REPO_OWNER}
+                    {"User-Agent", REPO_OWNER},
                 },
-                Content = new StringContent(serializedBody, Encoding.UTF8, "application/json")
+                Content = new StringContent(JsonUtils.Serialize(body), Encoding.UTF8, "application/json")
             };
         }
 
@@ -114,13 +95,6 @@ namespace GitHubReleasesCLI.clients
                 default:
                     return "";
             }
-        }
-
-        private async Task<T> Send<T>(HttpRequestMessage httpRequestMessage)
-        {
-            var response= client.Send(httpRequestMessage);
-            var body = await response.Content.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<T>(body, settings);
         }
 
         private static string CreateUploadUrl(string? uploadUrl, string zipName)

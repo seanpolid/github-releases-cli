@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GitHubReleasesCLI.dtos
 {
-    internal class CreateReleaseResponseDTO
+    public class CreateReleaseResponseDTO
     {
         public string? Url { get; set; }
 

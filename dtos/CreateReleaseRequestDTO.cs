@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GitHubReleasesCLI.NewFolder
 {
-    internal class CreateReleaseRequestDTO
+    public class CreateReleaseRequestDTO
     {
         public string? TagName { get; set; }
 
