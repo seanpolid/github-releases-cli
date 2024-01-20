@@ -6,14 +6,14 @@ using System.Threading.Tasks;
 using GitHubReleasesCLI.clients;
 using GitHubReleasesCLI.dtos;
 
-namespace Tests.clients
+namespace Tests.unit_tests.clients
 {
     public class GitHubClientTests
     {
         private GitHubClient gitHubClient;
         private Mock<BaseHttpClient> httpClient;
 
-        public GitHubClientTests() 
+        public GitHubClientTests()
         {
             string gitHubToken = "token";
             string repoOwner = "owner";
