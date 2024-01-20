@@ -10,7 +10,7 @@ namespace GitHubReleasesCLI.utils
 {
     public class JsonUtils
     {
-        private static JsonSerializerSettings settings;
+        private static readonly JsonSerializerSettings settings;
 
         static JsonUtils()
         {
