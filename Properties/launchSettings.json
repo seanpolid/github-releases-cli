@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "GitHubReleasesCLI": {
-      "commandName": "Project",
-      "commandLineArgs": "--v 1.2 --p ./GitHubReleasesCLI.dll --r test-repo"
-    }
-  }
-}
