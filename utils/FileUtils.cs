@@ -1,21 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO.Compression;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.IO.Compression;
 
 namespace GitHubReleasesCLI.utils
 {
     public class FileUtils
     {
         /// <summary>
-        /// Zips the contents found at the specified path. If it is a single file, it will
-        /// create a new file called 'asset.zip'. Otherwise, it will use the name of the folder 
-        /// for the zip file's name and it will include the base directory in the zip.
+        /// Zips the contents found at the specified path. Outputs a file called 'assets.zip'.
+        /// Returns the zipped assets as a byte array.
         /// </summary>
         /// <param name="path"></param>
-        public static void Zip(string path)
+        /// <returns></returns>
+        /// <exception cref="FileNotFoundException"></exception>
+        public static byte[] Zip(string path, string zipName)
         {
             string baseDirectory = Directory.GetCurrentDirectory();
             if (!Path.IsPathRooted(path))
@@ -25,30 +21,44 @@ namespace GitHubReleasesCLI.utils
 
             if (File.Exists(path))
             {
-                string zipPath = Path.Combine(baseDirectory, "asset.zip");
-                if (File.Exists(zipPath))
-                {
-                    File.Delete(zipPath);
-                }
+                string zipPath = Path.Combine(baseDirectory, $"{zipName}.zip");
+                ZipFile(path, zipPath);
 
-                using ZipArchive zip = ZipFile.Open(zipPath, ZipArchiveMode.Create);
-                zip.CreateEntryFromFile(path, Path.GetFileName(path));
+                return File.ReadAllBytes(zipPath); ;
             }
             else if (Directory.Exists(path))
             {
-                string zipFile = $"{path}.zip";
+                string zipFile = $"{zipName}.zip";
                 string zipPath = Path.Combine(baseDirectory, zipFile);
-                if (File.Exists(zipPath))
-                {
-                    File.Delete(zipPath);
-                }
+                ZipFolder(path, zipPath);
 
-                ZipFile.CreateFromDirectory(path, zipPath, CompressionLevel.Optimal, true);
+                return File.ReadAllBytes(zipPath);
             }
             else
             {
                 throw new FileNotFoundException($"{path} does not exist");
             }
+        }
+
+        private static void ZipFile(string path, string zipPath)
+        {
+            if (File.Exists(zipPath))
+            {
+                File.Delete(zipPath);
+            }
+
+            using ZipArchive zip = System.IO.Compression.ZipFile.Open(zipPath, ZipArchiveMode.Create);
+            zip.CreateEntryFromFile(path, Path.GetFileName(path));
+        }
+
+        private static void ZipFolder(string path, string zipPath)
+        {
+            if (File.Exists(zipPath))
+            {
+                File.Delete(zipPath);
+            }
+
+            System.IO.Compression.ZipFile.CreateFromDirectory(path, zipPath, CompressionLevel.Optimal, true);
         }
     }
 }

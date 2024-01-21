@@ -10,6 +10,8 @@ namespace Tests.integration_tests.utils
 {
     public class FileUtilsTests : IDisposable
     {
+        private readonly string zipName = "assets";
+        private readonly string zipFile = "assets.zip";
         private readonly string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
         private string? expectedDirectory;
         private string? testDirectory;
@@ -60,18 +62,18 @@ namespace Tests.integration_tests.utils
             // Arrange
             string path = "./file1.txt";
 
-            string zipFilePath = Path.Combine(baseDirectory, "asset.zip");
+            string zipFilePath = Path.Combine(baseDirectory, zipFile);
 
             // Act
-            FileUtils.Zip(path);
+            byte[] zippedFile = FileUtils.Zip(path, zipName);
+            ZipFile.ExtractToDirectory(zipFilePath, expectedDirectory);     // Confirm file can be unzipped properly
 
             // Assert
-            Assert.True(File.Exists(zipFilePath));
+            bool fileExists = File.Exists(Path.Combine(expectedDirectory, "file1.txt"));
+            Assert.True(fileExists);
 
-            ZipFile.ExtractToDirectory(zipFilePath, expectedDirectory);
-            Assert.True(
-                File.Exists(Path.Combine(expectedDirectory, "file1.txt"))
-            );
+            Assert.True(File.Exists(zipFilePath));
+            Assert.Equal(File.ReadAllBytes(zipFilePath), zippedFile);
         }
 
         [Fact]
@@ -80,34 +82,32 @@ namespace Tests.integration_tests.utils
             // Arrange
             string path = Path.Combine(baseDirectory, "file1.txt");
 
-            string zipFilePath = Path.Combine(baseDirectory, "asset.zip");
+            string zipFilePath = Path.Combine(baseDirectory, zipFile);
 
             // Act
-            FileUtils.Zip(path);
+            byte[] zippedFile = FileUtils.Zip(path, zipName);
+            ZipFile.ExtractToDirectory(zipFilePath, expectedDirectory);     // Confirm file can be unzipped properly
 
             // Assert
+            bool fileExists = File.Exists(Path.Combine(expectedDirectory, "file1.txt"));
+            Assert.True(fileExists);
             Assert.True(File.Exists(zipFilePath));
-
-            ZipFile.ExtractToDirectory(zipFilePath, expectedDirectory);
-            Assert.True(
-                File.Exists(Path.Combine(expectedDirectory, "file1.txt"))
-            );
+            Assert.Equal(File.ReadAllBytes(zipFilePath), zippedFile);
         }
 
         [Fact]
         public void Zip_Folder_Success()
         {
             // Assert
-            string zipFileName = Path.GetFileName(testDirectory) + ".zip";
-            string zipFilePath = Path.Combine(baseDirectory, zipFileName);
+            string zipFilePath = Path.Combine(baseDirectory, zipFile);
             
             // Act
-            FileUtils.Zip(testDirectory);
+            byte[] zippedFile = FileUtils.Zip(testDirectory, zipName);
+            ZipFile.ExtractToDirectory(zipFilePath, expectedDirectory);    // Confirm file can be unzipped properly
 
             //Assert
             Assert.True(File.Exists(zipFilePath));
-
-            ZipFile.ExtractToDirectory(zipFilePath, expectedDirectory);
+            Assert.Equal(File.ReadAllBytes(zipFilePath), zippedFile);
             AssertDirectoriesAreEqual(expectedDirectory, testDirectory);
         }
 
@@ -137,7 +137,7 @@ namespace Tests.integration_tests.utils
             // Act and Assert
             Assert.Throws<FileNotFoundException>(() =>
             {
-                FileUtils.Zip(path);
+                FileUtils.Zip(path, zipName);
             });
         }
     }

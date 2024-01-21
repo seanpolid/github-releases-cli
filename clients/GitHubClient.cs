@@ -1,9 +1,9 @@
 ﻿using GitHubReleasesCLI.dtos;
 using GitHubReleasesCLI.enums;
+using GitHubReleasesCLI.exceptions;
 using GitHubReleasesCLI.NewFolder;
 using GitHubReleasesCLI.utils;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
+using System.Net;
 using System.Text;
 
 namespace GitHubReleasesCLI.clients
@@ -35,7 +35,7 @@ namespace GitHubReleasesCLI.clients
         /// <param name="zipname"></param>
         /// <param name="version"></param>
         /// <returns></returns>
-        public async Task<string> CreateRelease(string repositoryName, string version, bool makeDraft, bool makeLatest, string zipName)
+        public virtual async Task<string> CreateRelease(string repositoryName, string version, bool makeDraft, bool makeLatest, string zipName)
         {
             string uri = $"https://api.github.com/repos/{REPO_OWNER}/{repositoryName}/releases";
             CreateReleaseRequestDTO createReleaseRequestDTO = new()
@@ -49,9 +49,20 @@ namespace GitHubReleasesCLI.clients
             };
 
             HttpRequestMessage request = CreateRequestMessage(HttpMethod.Post, uri, AcceptType.GITHUB_JSON, ContentType.JSON, createReleaseRequestDTO);
-            CreateReleaseResponseDTO response = await httpClient.Send<CreateReleaseResponseDTO>(request);
+            HttpResponseMessage response = httpClient.Send(request);
+            string responseBody = await response.Content.ReadAsStringAsync();
 
-            return CreateUploadUrl(response.UploadUrl, zipName);
+            if (response.StatusCode == HttpStatusCode.UnprocessableEntity)
+            {
+                throw new CreateReleaseException("Could not create the release because it already exists. Please make the new release unique.");
+            }
+            else if (!response.IsSuccessStatusCode)
+            {
+                throw new CreateReleaseException("A problem occurred while creating the release: " + responseBody);
+            }
+
+            var responseDTO = JsonUtils.Deserialize<CreateReleaseResponseDTO>(responseBody);
+            return CreateUploadUrl(responseDTO.UploadUrl, zipName);
         }
 
         private HttpRequestMessage CreateRequestMessage(HttpMethod method, string uri, AcceptType acceptType, ContentType contentType, object body)
@@ -67,8 +78,23 @@ namespace GitHubReleasesCLI.clients
                     {"X-GitHub-Api-Version", "2022-11-28"},
                     {"User-Agent", REPO_OWNER},
                 },
-                Content = new StringContent(JsonUtils.Serialize(body), Encoding.UTF8, "application/json")
+                Content = GetContent(body, contentType)
             };
+        }
+
+        private HttpContent GetContent(object body, ContentType contentType)
+        {
+            switch (contentType)
+            {
+                case ContentType.JSON:
+                    return new StringContent(JsonUtils.Serialize(body), Encoding.UTF8, "application/json");
+                case ContentType.ZIP:
+                    var content = new ByteArrayContent((byte[])body);
+                    content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/zip");
+                    return content;
+                default:
+                    throw new ArgumentException(contentType + " is not defined.");
+            }
         }
 
         private static string GetAcceptTypeString(AcceptType acceptType)
@@ -84,28 +110,22 @@ namespace GitHubReleasesCLI.clients
             }
         }
 
-        private static string GetContentTypeString(ContentType contentType)
-        {
-            switch (contentType)
-            {
-                case ContentType.ZIP:
-                    return "application/zip";
-                case ContentType.JSON:
-                    return "application/json";
-                default:
-                    return "";
-            }
-        }
-
         private static string CreateUploadUrl(string? uploadUrl, string zipName)
         {
             string baseUrl = uploadUrl.Substring(0, uploadUrl.IndexOf('{'));
-            return $"{baseUrl}?name={zipName}&label={zipName}";
+            return $"{baseUrl}?name={zipName}.zip&label={zipName}.zip";
         }
 
-        public void UploadReleaseAsset(string uri, string assetPath)
+        public async Task UploadReleaseAsset(string uri, byte[] zippedAssets)
         {
-
+            HttpRequestMessage request = CreateRequestMessage(HttpMethod.Post, uri, AcceptType.GITHUB_JSON, ContentType.ZIP, zippedAssets);
+            HttpResponseMessage response = httpClient.Send(request);
+            
+            string message = await response.Content.ReadAsStringAsync();
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new UploadReleaseAssetException("A problem occurred while uploading the asset(s): " + message);
+            } 
         }
     }
 }
