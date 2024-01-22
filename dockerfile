@@ -11,5 +11,5 @@ RUN chmod +x release.sh
 RUN cp release.sh /opt/bin/release
 
 RUN dotnet publish
-WORKDIR bin/Debug/net6.0
+WORKDIR bin/Debug/net6.0/publish
 RUN cp * /opt/bin/csharp/release

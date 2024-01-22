@@ -1,1 +1,1 @@
-dotnet /opt/bin/csharp/release/GitHubReleasesCLI
+/opt/bin/csharp/release/GitHubReleasesCLI
