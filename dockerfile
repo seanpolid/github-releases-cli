@@ -13,3 +13,7 @@ RUN cp release.sh /opt/bin/release
 RUN dotnet publish
 WORKDIR bin/Debug/net6.0/publish
 RUN cp * /opt/bin/csharp/release
+
+ENV PATH=$PATH:/opt/bin
+
+WORKDIR /
