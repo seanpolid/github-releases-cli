@@ -54,7 +54,8 @@ namespace GitHubReleasesCLI.clients
 
             if (response.StatusCode == HttpStatusCode.UnprocessableEntity)
             {
-                throw new CreateReleaseException("Could not create the release because it already exists. Please make the new release unique.");
+                string message = GetValidationErrorMessage(responseBody);
+                throw new CreateReleaseException(message);
             }
             else if (!response.IsSuccessStatusCode)
             {
@@ -82,7 +83,20 @@ namespace GitHubReleasesCLI.clients
             };
         }
 
-        private HttpContent GetContent(object body, ContentType contentType)
+        private static string GetAcceptTypeString(AcceptType acceptType)
+        {
+            switch (acceptType)
+            {
+                case AcceptType.GITHUB_JSON:
+                    return "application/vnd.github+json";
+                case AcceptType.OCTET_STREAM:
+                    return "application/octet-stream";
+                default:
+                    return "application/json";
+            }
+        }
+
+        private static HttpContent GetContent(object body, ContentType contentType)
         {
             switch (contentType)
             {
@@ -97,17 +111,35 @@ namespace GitHubReleasesCLI.clients
             }
         }
 
-        private static string GetAcceptTypeString(AcceptType acceptType)
+        private static string GetValidationErrorMessage(string responseBody)
         {
-            switch (acceptType)
+            StringBuilder builder = new("Could not create the release due to validation errors.");
+
+            var responseDTO = JsonUtils.Deserialize<CreateReleaseValidationErrorsDTO>(responseBody);
+            if (responseDTO == null || responseDTO.Errors.Count == 0)
             {
-                case AcceptType.GITHUB_JSON:
-                    return "application/vnd.github+json";
-                case AcceptType.OCTET_STREAM:
-                    return "application/octet-stream";
-                default:
-                    return "application/json";
+                return builder.ToString();
             }
+
+            builder.Append(" Please refer to the following:");
+            foreach (ValidationErrorDTO error in responseDTO.Errors)
+            {
+                if (error.Code is null) continue;
+
+                if (error.Code == "custom")
+                {
+                    builder.Append("\n- ");
+                    builder.Append(error.Message);
+                }
+                else if (error.Code == "invalid")
+                {
+                    builder.Append("\n- ");
+                    builder.Append(error.Field);
+                    builder.Append(" is invalid.");
+                }
+            }
+
+            return builder.ToString();
         }
 
         private static string CreateUploadUrl(string? uploadUrl, string zipName)
