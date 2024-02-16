@@ -16,12 +16,15 @@ namespace GitHubReleasesCLI.models
 
         public string Version { get; set; }
 
+        public string Branch { get; set; }
+
         public ParsedArgs()
         {
             AssetsPath = string.Empty;
             RepositoryName = string.Empty;
             ZipName = string.Empty;
             Version = string.Empty;
+            Branch = string.Empty;
         }
 
         public void FormatZipName()
@@ -38,7 +41,8 @@ namespace GitHubReleasesCLI.models
                    AssetsPath == args.AssetsPath &&
                    RepositoryName == args.RepositoryName &&
                    ZipName == args.ZipName &&
-                   Version == args.Version;
+                   Version == args.Version &&
+                   Branch == args.Branch;
         }
     }
 }

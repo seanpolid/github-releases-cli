@@ -8,6 +8,7 @@ namespace GitHubReleasesCLI.orchestrators
     public class Orchestrator
     {
         private const string DEFAULT_ZIP_NAME = "assets";
+        private const string DEFAULT_BRANCH = "main";
 
         public static async Task Run(string[] args, GitHubClient gitHubClient)
         {
@@ -35,12 +36,13 @@ namespace GitHubReleasesCLI.orchestrators
                 Console.WriteLine("Usage: release <ARGS>");
 
                 Console.WriteLine("\nRequired Args:");
-                Console.WriteLine($"{"--v",5}  {"Version of release",-15}");
-                Console.WriteLine($"{"--p",5}  {"Path to asset(s)",15}");
-                Console.WriteLine($"{"--r",5}  {"Repository name",-15}");
+                Console.WriteLine($"{"--v", 5}  Version of release");
+                Console.WriteLine($"{"--p", 5}  Path to asset(s)");
+                Console.WriteLine($"{"--r",5}  Repository name");
 
                 Console.WriteLine("\nOptional Args:");
-                Console.WriteLine($"{"--n",5}  {"Name of zip file",-15}");
+                Console.WriteLine($"{"--n",5}  Name of zip file");
+                Console.WriteLine($"{"--b",5}  Name of branch (defaults to 'main')");
 
                 return null;
             }
@@ -66,7 +68,8 @@ namespace GitHubReleasesCLI.orchestrators
                 AssetsPath = config["p"],
                 RepositoryName = config["r"],
                 ZipName = config["n"] ?? DEFAULT_ZIP_NAME,
-                Version = config["v"]
+                Version = config["v"],
+                Branch = config["b"] ?? DEFAULT_BRANCH
             };
             parsedArgs.FormatZipName();
 
