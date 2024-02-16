@@ -99,7 +99,7 @@ namespace GitHubReleasesCLI.clients
         private static HttpContent GetContent(object body, ContentType contentType)
         {
             string bodyString = JsonUtils.Serialize(body);
-            Console.WriteLine(body);
+
             switch (contentType)
             {
                 case ContentType.JSON:

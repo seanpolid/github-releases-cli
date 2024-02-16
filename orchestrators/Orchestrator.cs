@@ -14,7 +14,7 @@ namespace GitHubReleasesCLI.orchestrators
         {
             ParsedArgs? parsedArgs = ParseArgs(args);
             if (parsedArgs == null) return;
-            Console.WriteLine(parsedArgs);
+
             Console.WriteLine("Creating release");
             string uploadUri = await gitHubClient.CreateRelease(parsedArgs.RepositoryName, parsedArgs.Version, false, true, parsedArgs.ZipName, parsedArgs.Branch);
 
