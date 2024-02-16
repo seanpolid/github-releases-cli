@@ -51,7 +51,7 @@ namespace GitHubReleasesCLI.clients
             HttpRequestMessage request = CreateRequestMessage(HttpMethod.Post, uri, AcceptType.GITHUB_JSON, ContentType.JSON, createReleaseRequestDTO);
             HttpResponseMessage response = httpClient.Send(request);
             string responseBody = await response.Content.ReadAsStringAsync();
-            Console.WriteLine(responseBody);
+
             if (response.StatusCode == HttpStatusCode.UnprocessableEntity)
             {
                 string message = GetValidationErrorMessage(responseBody);
@@ -128,16 +128,20 @@ namespace GitHubReleasesCLI.clients
             {
                 if (error.Code is null) continue;
 
+                builder.Append("\n- ");
                 if (error.Code == "custom")
                 {
-                    builder.Append("\n- ");
                     builder.Append(error.Message);
                 }
                 else if (error.Code == "invalid")
                 {
-                    builder.Append("\n- ");
                     builder.Append(error.Field);
                     builder.Append(" is invalid.");
+                }
+                else if (error.Code == "already_exists")
+                {
+                    builder.Append(error.Field);
+                    builder.Append(" already exists.");
                 }
             }
 
