@@ -98,10 +98,12 @@ namespace GitHubReleasesCLI.clients
 
         private static HttpContent GetContent(object body, ContentType contentType)
         {
+            string bodyString = JsonUtils.Serialize(body);
+            Console.WriteLine(body);
             switch (contentType)
             {
                 case ContentType.JSON:
-                    return new StringContent(JsonUtils.Serialize(body), Encoding.UTF8, "application/json");
+                    return new StringContent(bodyString, Encoding.UTF8, "application/json");
                 case ContentType.ZIP:
                     var content = new ByteArrayContent((byte[])body);
                     content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/zip");
