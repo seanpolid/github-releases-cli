@@ -51,7 +51,7 @@ namespace GitHubReleasesCLI.clients
             HttpRequestMessage request = CreateRequestMessage(HttpMethod.Post, uri, AcceptType.GITHUB_JSON, ContentType.JSON, createReleaseRequestDTO);
             HttpResponseMessage response = httpClient.Send(request);
             string responseBody = await response.Content.ReadAsStringAsync();
-
+            Console.WriteLine(responseBody);
             if (response.StatusCode == HttpStatusCode.UnprocessableEntity)
             {
                 string message = GetValidationErrorMessage(responseBody);
