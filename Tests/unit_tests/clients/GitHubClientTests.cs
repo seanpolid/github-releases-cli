@@ -28,6 +28,7 @@ namespace Tests.unit_tests.clients
             string repositoryName = "test";
             string version = "v1.0";
             string zipName = "zipName";
+            string branch = "main";
 
             string url = "http://github.com/repos/repo/assets{?name,label}";
             string expectedUploadUrl = url.Substring(0, url.IndexOf("{")) + $"?name={zipName}.zip&label={zipName}.zip";
@@ -44,7 +45,7 @@ namespace Tests.unit_tests.clients
             mockHttpClient.Setup(mock => mock.Send(It.IsAny<HttpRequestMessage>())).Returns(httpResponseMessage);
 
             // Act
-            string actualUploadUrl = await gitHubClient.CreateRelease(repositoryName, version, false, false, zipName);
+            string actualUploadUrl = await gitHubClient.CreateRelease(repositoryName, version, false, false, zipName, branch);
 
             // Assert
             Assert.Equal(expectedUploadUrl, actualUploadUrl);
@@ -57,6 +58,7 @@ namespace Tests.unit_tests.clients
             string repositoryName = "test";
             string version = "v1.0";
             string zipName = "zipName";
+            string branch = "main";
 
             string url = "http://github.com/repos/repo/assets{?name,label}";
             string expectedUploadUrl = url.Substring(0, url.IndexOf("{")) + $"?name={zipName}.zip&label={zipName}.zip";
@@ -70,7 +72,7 @@ namespace Tests.unit_tests.clients
             // Act and Assert
             Assert.ThrowsAsync<CreateReleaseException>(async () =>
             {
-                await gitHubClient.CreateRelease(repositoryName, version, false, false, zipName);
+                await gitHubClient.CreateRelease(repositoryName, version, false, false, zipName, branch);
             });
         }
 
@@ -81,6 +83,7 @@ namespace Tests.unit_tests.clients
             string repositoryName = "test";
             string version = "v1.0";
             string zipName = "zipName";
+            string branch = "main";
 
             string url = "http://github.com/repos/repo/assets{?name,label}";
             string expectedUploadUrl = url.Substring(0, url.IndexOf("{")) + $"?name={zipName}.zip&label={zipName}.zip";
@@ -94,7 +97,7 @@ namespace Tests.unit_tests.clients
             // Act and Assert
             Assert.ThrowsAsync<CreateReleaseException>(async () =>
             {
-                await gitHubClient.CreateRelease(repositoryName, version, false, false, zipName);
+                await gitHubClient.CreateRelease(repositoryName, version, false, false, zipName, branch);
             });
         }
     }

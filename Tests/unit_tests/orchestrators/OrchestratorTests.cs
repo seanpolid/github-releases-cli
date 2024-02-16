@@ -88,7 +88,8 @@ namespace Tests.unit_tests.orchestrators
                 Version = "version",
                 RepositoryName = "repository name",
                 AssetsPath = "path",
-                ZipName = "assets"
+                ZipName = "assets",
+                Branch = "main"
             };
 
             // Act
@@ -108,7 +109,8 @@ namespace Tests.unit_tests.orchestrators
                 Version = "version",
                 RepositoryName = "repository name",
                 AssetsPath = "path",
-                ZipName = "zip name"
+                ZipName = "zip name",
+                Branch = "main"
             };
 
             // Act
