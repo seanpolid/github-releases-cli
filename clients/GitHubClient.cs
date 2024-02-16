@@ -35,7 +35,7 @@ namespace GitHubReleasesCLI.clients
         /// <param name="zipname"></param>
         /// <param name="version"></param>
         /// <returns></returns>
-        public virtual async Task<string> CreateRelease(string repositoryName, string version, bool makeDraft, bool makeLatest, string zipName)
+        public virtual async Task<string> CreateRelease(string repositoryName, string version, bool makeDraft, bool makeLatest, string zipName, string branch)
         {
             string uri = $"https://api.github.com/repos/{REPO_OWNER}/{repositoryName}/releases";
             CreateReleaseRequestDTO createReleaseRequestDTO = new()
@@ -45,7 +45,7 @@ namespace GitHubReleasesCLI.clients
                 Draft = makeDraft,
                 Body = "",
                 MakeLatest = $"{makeLatest}",
-                TargetCommitish = "main"
+                TargetCommitish = branch
             };
 
             HttpRequestMessage request = CreateRequestMessage(HttpMethod.Post, uri, AcceptType.GITHUB_JSON, ContentType.JSON, createReleaseRequestDTO);

@@ -16,7 +16,7 @@ namespace GitHubReleasesCLI.orchestrators
             if (parsedArgs == null) return;
 
             Console.WriteLine("Creating release");
-            string uploadUri = await gitHubClient.CreateRelease(parsedArgs.RepositoryName, parsedArgs.Version, false, true, parsedArgs.ZipName);
+            string uploadUri = await gitHubClient.CreateRelease(parsedArgs.RepositoryName, parsedArgs.Version, false, true, parsedArgs.ZipName, parsedArgs.Branch);
 
             Console.WriteLine("Zipping assets");
             byte[] zippedAssets = FileUtils.Zip(parsedArgs.AssetsPath, parsedArgs.ZipName);
