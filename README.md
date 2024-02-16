@@ -1,5 +1,5 @@
 <h1>Overview</h1>
-GitHub Releases CLI is a command line tool that focuses on automating the zipping and packaging of assets to be uploaded to the GitHub Releases endpoint. Follow the instructions below to get this integrated into your CI/CD pipeline.
+GitHub Releases CLI is a command line tool that focuses on automating the zipping and uploading of assets to the GitHub Releases endpoint. Follow the instructions below to get this integrated into your CI/CD pipeline.
 
 <h1>Instructions</h1>
 Regardless of the route you take to get this installed on your machine, you will need to set the following environmental variables for everything to work:
