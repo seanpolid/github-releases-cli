@@ -2,13 +2,7 @@
 {
     public class BaseHttpClient
     {
-        private readonly HttpClient httpClient;
-
-        public BaseHttpClient()
-        {
-            httpClient = new();
-            httpClient.Timeout = TimeSpan.FromMinutes(5);
-        }
+        private readonly HttpClient httpClient = new();
 
         public virtual HttpResponseMessage Send(HttpRequestMessage httpRequestMessage)
         {
