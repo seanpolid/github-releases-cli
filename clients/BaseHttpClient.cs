@@ -7,7 +7,7 @@
         public BaseHttpClient()
         {
             httpClient = new();
-            httpClient.Timeout = TimeSpan.FromMinutes(5);
+            httpClient.Timeout = TimeSpan.FromMinutes(10);
         }
 
         public virtual HttpResponseMessage Send(HttpRequestMessage httpRequestMessage)
