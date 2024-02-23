@@ -18,6 +18,8 @@ namespace GitHubReleasesCLI.models
 
         public string Branch { get; set; }
 
+        public string? KeyPath { get; set; }
+
         public ParsedArgs()
         {
             AssetsPath = string.Empty;
@@ -42,7 +44,8 @@ namespace GitHubReleasesCLI.models
                    RepositoryName == args.RepositoryName &&
                    ZipName == args.ZipName &&
                    Version == args.Version &&
-                   Branch == args.Branch;
+                   Branch == args.Branch &&
+                   KeyPath == args.KeyPath;
         }
 
         public override string? ToString()

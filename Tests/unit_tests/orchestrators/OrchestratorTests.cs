@@ -103,14 +103,15 @@ namespace Tests.unit_tests.orchestrators
         public void ParseArgs_AllArgsProvided_Success()
         {
             // Arrange
-            string[] args = { "--v", "version", "--r", "repository name", "--p", "path", "--n", "zip name" };
+            string[] args = { "--v", "version", "--r", "repository name", "--p", "path", "--n", "zip name", "--k", "key path" };
             ParsedArgs expected = new()
             {
                 Version = "version",
                 RepositoryName = "repository name",
                 AssetsPath = "path",
                 ZipName = "zip name",
-                Branch = "main"
+                Branch = "main",
+                KeyPath = "key path"
             };
 
             // Act

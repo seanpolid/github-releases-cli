@@ -9,6 +9,7 @@ namespace GitHubReleasesCLI.enums
     public enum ContentType
     {
         ZIP,
-        JSON
+        JSON,
+        OCTET_STREAM
     }
 }

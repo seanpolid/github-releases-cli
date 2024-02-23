@@ -65,7 +65,7 @@ namespace Tests.integration_tests.utils
             string zipFilePath = Path.Combine(baseDirectory, zipFile);
 
             // Act
-            byte[] zippedFile = FileUtils.Zip(path, zipName);
+            byte[] zippedFile = FileUtils.Zip(baseDirectory, path, zipName);
             ZipFile.ExtractToDirectory(zipFilePath, expectedDirectory);     // Confirm file can be unzipped properly
 
             // Assert
@@ -85,7 +85,7 @@ namespace Tests.integration_tests.utils
             string zipFilePath = Path.Combine(baseDirectory, zipFile);
 
             // Act
-            byte[] zippedFile = FileUtils.Zip(path, zipName);
+            byte[] zippedFile = FileUtils.Zip(baseDirectory, path, zipName);
             ZipFile.ExtractToDirectory(zipFilePath, expectedDirectory);     // Confirm file can be unzipped properly
 
             // Assert
@@ -102,7 +102,7 @@ namespace Tests.integration_tests.utils
             string zipFilePath = Path.Combine(baseDirectory, zipFile);
             
             // Act
-            byte[] zippedFile = FileUtils.Zip(testDirectory, zipName);
+            byte[] zippedFile = FileUtils.Zip(baseDirectory, testDirectory, zipName);
             ZipFile.ExtractToDirectory(zipFilePath, expectedDirectory);    // Confirm file can be unzipped properly
 
             //Assert
@@ -137,7 +137,7 @@ namespace Tests.integration_tests.utils
             // Act and Assert
             Assert.Throws<FileNotFoundException>(() =>
             {
-                FileUtils.Zip(path, zipName);
+                FileUtils.Zip(baseDirectory, path, zipName);
             });
         }
     }

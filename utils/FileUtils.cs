@@ -11,9 +11,8 @@ namespace GitHubReleasesCLI.utils
         /// <param name="path"></param>
         /// <returns></returns>
         /// <exception cref="FileNotFoundException"></exception>
-        public static byte[] Zip(string path, string zipName)
+        public static byte[] Zip(string baseDirectory, string path, string zipName)
         {
-            string baseDirectory = Directory.GetCurrentDirectory();
             if (!Path.IsPathRooted(path))
             {
                 path = Path.Combine(baseDirectory, path);
