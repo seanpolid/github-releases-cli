@@ -21,7 +21,7 @@ namespace GitHubReleasesCLI.orchestrators
             string uploadUriTemplate = await gitHubClient.CreateRelease(parsedArgs.RepositoryName, parsedArgs.Version, false, true, parsedArgs.ZipName, parsedArgs.Branch);
 
             Console.WriteLine("Zipping assets");
-            byte[] zippedAssets = FileUtils.Zip(BASE_DIRECTORY, parsedArgs.AssetsPath, parsedArgs.ZipName);
+            byte[] zippedAssets = FileUtils.Zip(BASE_DIRECTORY, parsedArgs.AssetsPath, parsedArgs.ZipName, parsedArgs.IncludeBaseDirectory);
 
             if (parsedArgs.KeyPath != null)
             {
@@ -57,6 +57,7 @@ namespace GitHubReleasesCLI.orchestrators
                 Console.WriteLine($"{"--n",5}  Name of zip file");
                 Console.WriteLine($"{"--b",5}  Name of branch (defaults to 'main')");
                 Console.WriteLine($"{"--k",5}  Path to private key file (PEM form)");
+                Console.WriteLine($"{"--i",5}  Include base directory");
 
                 return null;
             }
@@ -77,6 +78,8 @@ namespace GitHubReleasesCLI.orchestrators
                 return null;
             }
 
+            bool includeBaseDirectory = args.Where(args => args.Equals("--i")).Count() > 0;
+
             var parsedArgs = new ParsedArgs()
             {
                 AssetsPath = config["p"],
@@ -84,7 +87,8 @@ namespace GitHubReleasesCLI.orchestrators
                 ZipName = config["n"] ?? DEFAULT_ZIP_NAME,
                 Version = config["v"],
                 Branch = config["b"] ?? DEFAULT_BRANCH,
-                KeyPath = config["k"]
+                KeyPath = config["k"],
+                IncludeBaseDirectory = includeBaseDirectory
             };
             parsedArgs.FormatZipName();
 

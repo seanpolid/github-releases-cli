@@ -11,7 +11,7 @@ namespace GitHubReleasesCLI.utils
         /// <param name="path"></param>
         /// <returns></returns>
         /// <exception cref="FileNotFoundException"></exception>
-        public static byte[] Zip(string baseDirectory, string path, string zipName)
+        public static byte[] Zip(string baseDirectory, string path, string zipName, bool includeBaseDirectory)
         {
             if (!Path.IsPathRooted(path))
             {
@@ -29,7 +29,7 @@ namespace GitHubReleasesCLI.utils
             {
                 string zipFile = $"{zipName}.zip";
                 string zipPath = Path.Combine(baseDirectory, zipFile);
-                ZipFolder(path, zipPath);
+                ZipFolder(path, zipPath, includeBaseDirectory);
 
                 return File.ReadAllBytes(zipPath);
             }
@@ -50,14 +50,14 @@ namespace GitHubReleasesCLI.utils
             zip.CreateEntryFromFile(path, Path.GetFileName(path));
         }
 
-        private static void ZipFolder(string path, string zipPath)
+        private static void ZipFolder(string path, string zipPath, bool includeBaseDirectory)
         {
             if (File.Exists(zipPath))
             {
                 File.Delete(zipPath);
             }
 
-            System.IO.Compression.ZipFile.CreateFromDirectory(path, zipPath, CompressionLevel.Optimal, true);
+            System.IO.Compression.ZipFile.CreateFromDirectory(path, zipPath, CompressionLevel.Optimal, includeBaseDirectory);
         }
     }
 }

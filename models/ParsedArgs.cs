@@ -20,6 +20,8 @@ namespace GitHubReleasesCLI.models
 
         public string? KeyPath { get; set; }
 
+        public bool IncludeBaseDirectory { get; set; }
+
         public ParsedArgs()
         {
             AssetsPath = string.Empty;
@@ -27,6 +29,7 @@ namespace GitHubReleasesCLI.models
             ZipName = string.Empty;
             Version = string.Empty;
             Branch = string.Empty;
+            IncludeBaseDirectory = false;
         }
 
         public void FormatZipName()
@@ -45,7 +48,8 @@ namespace GitHubReleasesCLI.models
                    ZipName == args.ZipName &&
                    Version == args.Version &&
                    Branch == args.Branch &&
-                   KeyPath == args.KeyPath;
+                   KeyPath == args.KeyPath &&
+                   IncludeBaseDirectory == args.IncludeBaseDirectory;
         }
 
         public override string? ToString()
