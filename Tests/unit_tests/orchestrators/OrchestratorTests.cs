@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using GitHubReleasesCLI.models;
-using GitHubReleasesCLI.orchestrators;
 using GitHubReleasesCLI.clients;
 using Xunit.Sdk;
 

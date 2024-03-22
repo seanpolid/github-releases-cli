@@ -59,5 +59,11 @@ namespace GitHubReleasesCLI.utils
 
             System.IO.Compression.ZipFile.CreateFromDirectory(path, zipPath, CompressionLevel.Optimal, includeBaseDirectory);
         }
+
+        public static byte[] ReadFile(string baseDirectory, string path)
+        {
+            path = Path.Combine(baseDirectory, path);
+            return File.ReadAllBytes(path);
+        }
     }
 }

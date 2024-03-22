@@ -32,7 +32,7 @@ namespace GitHubReleasesCLI
             }
             catch (Exception ex)
             {
-                if (ex is CreateReleaseException || ex is UploadReleaseAssetException)
+                if (ex is CreateReleaseException || ex is UploadReleaseAssetException || ex is InvalidArgumentException)
                 {
                     Console.WriteLine(ex.Message);
                 }

@@ -22,6 +22,8 @@ namespace GitHubReleasesCLI.models
 
         public bool IncludeBaseDirectory { get; set; }
 
+        public bool ZipAssets { get; set; }
+
         public ParsedArgs()
         {
             AssetsPath = string.Empty;
@@ -30,6 +32,7 @@ namespace GitHubReleasesCLI.models
             Version = string.Empty;
             Branch = string.Empty;
             IncludeBaseDirectory = false;
+            ZipAssets = false;
         }
 
         public void FormatZipName()
@@ -49,7 +52,8 @@ namespace GitHubReleasesCLI.models
                    Version == args.Version &&
                    Branch == args.Branch &&
                    KeyPath == args.KeyPath &&
-                   IncludeBaseDirectory == args.IncludeBaseDirectory;
+                   IncludeBaseDirectory == args.IncludeBaseDirectory &&
+                   ZipAssets == args.ZipAssets;
         }
 
         public override string? ToString()
